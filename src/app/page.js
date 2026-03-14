@@ -14,11 +14,15 @@ function getStatus(wait) {
   return { label: 'High', color: 'bg-rose-500' };
 }
 
-function getWaitTextColor(wait) {
+function getWaitTextClasses(wait) {
   if (Number.isNaN(wait)) return 'text-slate-300';
-  if (wait < 15) return 'text-emerald-400';
-  if (wait <= 30) return 'text-amber-300';
-  return 'text-rose-400';
+  if (wait < 15) {
+    return 'text-emerald-400 drop-shadow-[0_0_18px_rgba(16,185,129,0.85)]';
+  }
+  if (wait <= 30) {
+    return 'text-amber-300 drop-shadow-[0_0_18px_rgba(251,191,36,0.8)]';
+  }
+  return 'text-rose-400 drop-shadow-[0_0_18px_rgba(248,113,113,0.8)]';
 }
 
 export default function DashboardPage() {
@@ -50,43 +54,36 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-50 px-4 py-10">
       <div className="mx-auto max-w-6xl">
-        <header className="mb-10 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 ring-1 ring-emerald-400/40">
-                <span className="absolute inline-flex h-6 w-6 animate-ping rounded-full bg-emerald-400/40" />
-                <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-400 shadow shadow-emerald-500/80" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-3xl font-semibold tracking-tight text-slate-50">
-                    Civiq
-                  </h1>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-300 ring-1 ring-emerald-500/40">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                    Live
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-slate-400">
-                  Real-time crowd insight from your{' '}
-                  <span className="font-mono text-xs">locations</span> collection.
-                </p>
-              </div>
-            </div>
+        <header className="mb-10 flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-50">Civiq</h1>
+            <p className="text-sm text-slate-400">
+              Real-time crowd insight from your{' '}
+              <span className="font-mono text-xs">locations</span> collection.
+            </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-            <div className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              <span>&lt; 15 min</span>
+          <div className="flex flex-col items-end gap-2 text-xs text-slate-400">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-3.5 w-3.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/40" />
+                <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-emerald-400 shadow shadow-emerald-500/80" />
+              </span>
+              <span className="font-medium text-emerald-300">System Live</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />
-              <span>15–30 min</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
-              <span>&gt; 30 min</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span>&lt; 15 min</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />
+                <span>15–30 min</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+                <span>&gt; 30 min</span>
+              </div>
             </div>
           </div>
         </header>
@@ -104,7 +101,7 @@ export default function DashboardPage() {
             </p>
           </div>
         ) : (
-          <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {locations.map((loc) => {
               const wait = Number(loc.current_wait ?? 0);
               const status = getStatus(wait);
@@ -112,7 +109,7 @@ export default function DashboardPage() {
               return (
                 <article
                   key={loc.id}
-                  className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-sm shadow-slate-950/40 transition hover:border-slate-700 hover:shadow-lg"
+                  className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/40 p-5 shadow-sm shadow-slate-950/40 backdrop-blur-md transition hover:border-slate-700 hover:shadow-lg"
                 >
                   <div className="mb-4 flex items-start justify-between gap-3">
                     <div>
@@ -137,7 +134,7 @@ export default function DashboardPage() {
                         Current wait
                       </p>
                       <p
-                        className={`text-3xl font-semibold ${getWaitTextColor(
+                        className={`text-4xl font-bold leading-tight ${getWaitTextClasses(
                           wait
                         )} transition-colors`}
                       >
