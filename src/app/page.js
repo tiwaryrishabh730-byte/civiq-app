@@ -164,6 +164,49 @@ export default function DashboardPage() {
           </div>
         </header>
 
+        {/* Spatial hero / map section */}
+        <section className="hero-section">
+          <div className="hero-header-row">
+            <div>
+              <p className="hero-title">Mumbai Live Network</p>
+              <p className="hero-subtitle">
+                Spatial view of live crowd signals across key hubs.
+              </p>
+            </div>
+            {userLocation && (
+              <div className="hero-location-badge">
+                <span className="hero-location-dot" />
+                <span>
+                  You&apos;re near{' '}
+                  <strong>
+                    {userLocation.lat.toFixed(2)}, {userLocation.lng.toFixed(2)}
+                  </strong>
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="hero-map-shell">
+            <img
+              src="https://images.unsplash.com/photo-1570160896387-996a9134db2b?q=80&w=2070&auto=format&fit=crop"
+              alt="Mumbai city aerial night view"
+              className="hero-map-img"
+            />
+            <div className="hero-map-overlay">
+              {/* Approximate pins for CST, Lilavati, NMIMS */}
+              <div className="hero-pin" style={{ top: '32%', left: '38%' }}>
+                <span className="hero-pin-label">CST</span>
+              </div>
+              <div className="hero-pin" style={{ top: '42%', left: '62%' }}>
+                <span className="hero-pin-label">Lilavati</span>
+              </div>
+              <div className="hero-pin" style={{ top: '58%', left: '48%' }}>
+                <span className="hero-pin-label">NMIMS</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {loading ? (
           <div style={{ textAlign: 'center', padding: '5rem 0', color: '#9ca3af' }}>
             Loading locations...
@@ -201,6 +244,7 @@ export default function DashboardPage() {
                 !Number.isNaN(Number(loc.lng));
 
               let distanceText = null;
+              let isNear = false;
               if (userLocation && hasCoords) {
                 const dKm = haversineKm(
                   Number(userLocation.lat),
@@ -209,6 +253,9 @@ export default function DashboardPage() {
                   Number(loc.lng)
                 );
                 distanceText = `${dKm.toFixed(1)} km away`;
+                if (dKm < 15) {
+                  isNear = true;
+                }
               }
 
               const lastUpdatedRaw = loc.lastUpdated ?? loc.last_updated ?? null;
@@ -223,13 +270,7 @@ export default function DashboardPage() {
                         <p className="card-address">{loc.address}</p>
                       )}
                       {distanceText && (
-                        <p
-                          style={{
-                            marginTop: '0.2rem',
-                            fontSize: '0.75rem',
-                            color: '#9ca3af',
-                          }}
-                        >
+                        <p className={`card-distance${isNear ? ' near' : ''}`}>
                           {distanceText}
                         </p>
                       )}
