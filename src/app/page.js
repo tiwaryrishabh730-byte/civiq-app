@@ -101,7 +101,7 @@ export default function DashboardPage() {
             </p>
           </div>
         ) : (
-          <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {locations.map((loc) => {
               const wait = Number(loc.current_wait ?? 0);
               const status = getStatus(wait);
