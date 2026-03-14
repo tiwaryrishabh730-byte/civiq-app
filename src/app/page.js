@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import {
   collection,
   doc,
@@ -10,6 +11,9 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+
+const MUMBAI_MAP_SRC =
+  'https://images.unsplash.com/photo-1570160896387-996a9134db2b?q=80&w=2070&auto=format&fit=crop';
 
 function getStatus(wait) {
   if (wait < 20) {
@@ -137,7 +141,14 @@ export default function DashboardPage() {
         <header className="dashboard-header">
           <div>
             <div>
-              <img src="/logo.png" alt="Civiq logo" className="dashboard-logo-img" />
+              <Image
+                src="/logo.png"
+                alt="Civiq"
+                width={120}
+                height={40}
+                className="dashboard-logo-img"
+                priority
+              />
             </div>
             <p className="dashboard-subtitle">
               Real-time crowd insight from your <code>locations</code> collection.
@@ -205,10 +216,13 @@ export default function DashboardPage() {
           </div>
 
           <div className="hero-map-shell">
-            <img
-              src="https://images.unsplash.com/photo-1570160896387-996a9134db2b?q=80&w=2070&auto=format&fit=crop"
+            <Image
+              src={MUMBAI_MAP_SRC}
               alt="Mumbai city aerial night view"
+              fill
+              sizes="(max-width: 768px) 100vw, 72rem"
               className="hero-map-img"
+              unoptimized={false}
             />
             <div className="hero-map-overlay">
               {/* Approximate pins for CST, Lilavati, NMIMS */}
