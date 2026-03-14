@@ -59,6 +59,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(true);
 
   async function updateWaitTime(locationId, waitValue) {
     try {
@@ -100,6 +101,14 @@ export default function DashboardPage() {
     );
   }, []);
 
+  // Simulated initial "Detecting location..." phase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLocationLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const q = query(collection(db, 'locations'));
 
@@ -127,19 +136,12 @@ export default function DashboardPage() {
       <div className="dashboard-inner">
         <header className="dashboard-header">
           <div>
-            <h1 className="dashboard-title">Civiq</h1>
+            <div>
+              <img src="/logo.png" alt="Civiq logo" className="dashboard-logo-img" />
+            </div>
             <p className="dashboard-subtitle">
               Real-time crowd insight from your <code>locations</code> collection.
             </p>
-            {userLocation && (
-              <p
-                className="dashboard-subtitle"
-                style={{ fontSize: '0.75rem', marginTop: '0.15rem' }}
-              >
-                Your location (approx): {userLocation.lat.toFixed(3)},{' '}
-                {userLocation.lng.toFixed(3)}
-              </p>
-            )}
           </div>
 
           <div className="dashboard-system-live">
@@ -173,14 +175,30 @@ export default function DashboardPage() {
                 Spatial view of live crowd signals across key hubs.
               </p>
             </div>
-            {userLocation && (
-              <div className="hero-location-badge">
+            {locationLoading ? (
+              <div className="hero-detecting-pill">
+                <span className="hero-detecting-dot" />
+                <span>Detecting location...</span>
+              </div>
+            ) : (
+              <div
+                className="hero-location-badge"
+                style={{
+                  opacity: locationLoading ? 0 : 1,
+                  transform: locationLoading ? 'translateY(-4px)' : 'translateY(0)',
+                  transition: 'opacity 320ms ease, transform 320ms ease',
+                }}
+              >
                 <span className="hero-location-dot" />
                 <span>
-                  You&apos;re near{' '}
-                  <strong>
-                    {userLocation.lat.toFixed(2)}, {userLocation.lng.toFixed(2)}
-                  </strong>
+                  {userLocation
+                    ? <>
+                        You&apos;re near{' '}
+                        <strong>
+                          {userLocation.lat.toFixed(2)}, {userLocation.lng.toFixed(2)}
+                        </strong>
+                      </>
+                    : <span>📍 Mumbai Hub</span>}
                 </span>
               </div>
             )}
