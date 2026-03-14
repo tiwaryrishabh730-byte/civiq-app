@@ -6,26 +6,19 @@ import { db } from '../lib/firebase';
 
 function getStatus(wait) {
   if (wait < 20) {
-    return { label: 'Low', color: 'bg-emerald-500' };
+    return { label: 'Low', dotClass: 'status-dot low' };
   }
   if (wait <= 40) {
-    return { label: 'Moderate', color: 'bg-amber-400' };
+    return { label: 'Moderate', dotClass: 'status-dot med' };
   }
-  return { label: 'High', color: 'bg-rose-500' };
+  return { label: 'High', dotClass: 'status-dot high' };
 }
 
-function getWaitTextClasses(wait) {
-  if (Number.isNaN(wait)) return 'text-slate-300';
-  if (wait < 15) {
-    // Emerald glow for low wait times
-    return 'text-emerald-400 md:text-emerald-500 drop-shadow-[0_0_22px_rgba(16,185,129,0.95)]';
-  }
-  if (wait <= 30) {
-    // Amber glow for medium wait times
-    return 'text-amber-300 md:text-amber-400 drop-shadow-[0_0_22px_rgba(251,191,36,0.95)]';
-  }
-  // Rose glow for high wait times
-  return 'text-rose-400 md:text-rose-500 drop-shadow-[0_0_22px_rgba(248,113,113,0.95)]';
+function getWaitClasses(wait) {
+  if (Number.isNaN(wait)) return 'wait-value';
+  if (wait < 15) return 'wait-value wait-low';
+  if (wait <= 30) return 'wait-value wait-medium';
+  return 'wait-value wait-high';
 }
 
 export default function DashboardPage() {
@@ -55,36 +48,32 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50 px-4 py-10">
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-10 flex flex-wrap items-start justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-extrabold tracking-tight text-slate-50">Civiq</h1>
-            <p className="text-sm text-slate-400">
-              Real-time crowd insight from your{' '}
-              <span className="font-mono text-xs">locations</span> collection.
+    <main className="dashboard-main">
+      <div className="dashboard-inner">
+        <header className="dashboard-header">
+          <div>
+            <h1 className="dashboard-title">Civiq</h1>
+            <p className="dashboard-subtitle">
+              Real-time crowd insight from your <code>locations</code> collection.
             </p>
           </div>
 
-          <div className="flex flex-col items-end gap-2 text-xs text-slate-400">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-3.5 w-3.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/40" />
-                <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-emerald-400 shadow shadow-emerald-500/80" />
-              </span>
-              <span className="font-medium text-emerald-300">System Live</span>
+          <div className="dashboard-system-live">
+            <div className="system-live-row">
+              <span className="system-live-dot" />
+              <span style={{ color: '#6ee7b7', fontWeight: 600 }}>System Live</span>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <div className="dashboard-legend">
+              <div className="legend-item">
+                <span className="legend-dot low" />
                 <span>&lt; 15 min</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />
+              <div className="legend-item">
+                <span className="legend-dot med" />
                 <span>15–30 min</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+              <div className="legend-item">
+                <span className="legend-dot high" />
                 <span>&gt; 30 min</span>
               </div>
             </div>
@@ -92,61 +81,58 @@ export default function DashboardPage() {
         </header>
 
         {loading ? (
-          <div className="flex items-center justify-center py-24 text-slate-400">
+          <div style={{ textAlign: 'center', padding: '5rem 0', color: '#9ca3af' }}>
             Loading locations...
           </div>
         ) : locations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/40 py-16">
-            <p className="text-sm font-medium text-slate-200">No locations found</p>
-            <p className="mt-1 text-xs text-slate-500">
-              Add documents to the <span className="font-mono text-[11px]">locations</span>{' '}
-              collection in Firestore to see them here.
+          <div
+            style={{
+              borderRadius: '1rem',
+              border: '1px dashed #1f2937',
+              background: 'rgba(15,23,42,0.7)',
+              padding: '4rem 1.5rem',
+              textAlign: 'center',
+            }}
+          >
+            <p style={{ fontSize: '0.95rem', fontWeight: 500, marginBottom: '0.25rem' }}>
+              No locations found
+            </p>
+            <p style={{ fontSize: '0.8rem', color: '#9ca3af', margin: 0 }}>
+              Add documents to the <code>locations</code> collection in Firestore to see them
+              here.
             </p>
           </div>
         ) : (
-          <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <section className="dashboard-grid">
             {locations.map((loc) => {
               const wait = Number(loc.current_wait ?? 0);
               const status = getStatus(wait);
 
               return (
-                <article
-                  key={loc.id}
-                  className="flex flex-col justify-between rounded-2xl border border-slate-700/80 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/60 backdrop-blur-md transition hover:border-slate-500 hover:shadow-2xl"
-                >
-                  <div className="mb-4 flex items-start justify-between gap-3">
+                <article key={loc.id} className="dashboard-card">
+                  <div className="card-header">
                     <div>
-                      <h2 className="text-base font-semibold text-slate-50">
-                        {loc.name || 'Unnamed location'}
-                      </h2>
+                      <h2 className="card-title">{loc.name || 'Unnamed location'}</h2>
                       {loc.address && (
-                        <p className="mt-1 text-xs text-slate-400">{loc.address}</p>
+                        <p className="card-address">{loc.address}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-300">
-                      <span
-                        className={`h-2.5 w-2.5 rounded-full ${status.color} shadow shadow-slate-900`}
-                      />
+                    <div className="status-pill">
+                      <span className={status.dotClass} />
                       <span>{status.label}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-end justify-between pt-2">
+                  <div className="card-footer">
                     <div>
-                      <p className="text-[11px] uppercase tracking-wide text-slate-500">
-                        Current wait
-                      </p>
-                      <p
-                        className={`text-4xl font-bold leading-tight ${getWaitTextClasses(
-                          wait
-                        )} transition-colors`}
-                      >
+                      <p className="wait-label">Current wait</p>
+                      <p className={getWaitClasses(wait)}>
                         {Number.isNaN(wait) ? '—' : wait}
-                        <span className="ml-1 text-sm font-normal text-slate-400">min</span>
+                        <span className="wait-unit">min</span>
                       </p>
                     </div>
                     {loc.last_updated && (
-                      <p className="text-[11px] text-slate-500">
+                      <p className="updated-text">
                         Updated{' '}
                         {typeof loc.last_updated.toDate === 'function'
                           ? loc.last_updated.toDate().toLocaleTimeString()
