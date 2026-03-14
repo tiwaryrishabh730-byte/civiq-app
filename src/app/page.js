@@ -1,7 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, onSnapshot, query } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  updateDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 function getStatus(wait) {
@@ -24,6 +31,18 @@ function getWaitClasses(wait) {
 export default function DashboardPage() {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  async function updateWaitTime(locationId, waitValue) {
+    try {
+      const ref = doc(db, 'locations', locationId);
+      await updateDoc(ref, {
+        current_wait: waitValue,
+        last_updated: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error('Error updating wait time:', error);
+    }
+  }
 
   useEffect(() => {
     const q = query(collection(db, 'locations'));
@@ -130,6 +149,42 @@ export default function DashboardPage() {
                         {Number.isNaN(wait) ? '—' : wait}
                         <span className="wait-unit">min</span>
                       </p>
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <p
+                          style={{
+                            fontSize: '0.7rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.14em',
+                            color: '#6b7280',
+                            marginBottom: '0.2rem',
+                          }}
+                        >
+                          Report live
+                        </p>
+                        <div style={{ display: 'flex', gap: '0.35rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => updateWaitTime(loc.id, 10)}
+                            className="inline-flex items-center rounded-full bg-slate-800/50 px-2 py-0.5 text-[0.65rem] font-medium text-slate-200 hover:bg-slate-700 transition"
+                          >
+                            Quiet
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateWaitTime(loc.id, 30)}
+                            className="inline-flex items-center rounded-full bg-slate-800/50 px-2 py-0.5 text-[0.65rem] font-medium text-slate-200 hover:bg-slate-700 transition"
+                          >
+                            Busy
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateWaitTime(loc.id, 60)}
+                            className="inline-flex items-center rounded-full bg-slate-800/50 px-2 py-0.5 text-[0.65rem] font-medium text-slate-200 hover:bg-slate-700 transition"
+                          >
+                            Full
+                          </button>
+                        </div>
+                      </div>
                     </div>
                     {loc.last_updated && (
                       <p className="updated-text">
