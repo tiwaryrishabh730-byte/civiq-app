@@ -14,6 +14,13 @@ function getStatus(wait) {
   return { label: 'High', color: 'bg-rose-500' };
 }
 
+function getWaitTextColor(wait) {
+  if (Number.isNaN(wait)) return 'text-slate-300';
+  if (wait < 15) return 'text-emerald-400';
+  if (wait <= 30) return 'text-amber-300';
+  return 'text-rose-400';
+}
+
 export default function DashboardPage() {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,20 +50,45 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-50 px-4 py-10">
       <div className="mx-auto max-w-6xl">
-        <header className="mb-8 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-50">
-              Locations Dashboard
-            </h1>
-            <p className="mt-1 text-sm text-slate-400">
-              Live wait times from your Firestore <span className="font-mono">locations</span>{' '}
-              collection.
-            </p>
+        <header className="mb-10 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 ring-1 ring-emerald-400/40">
+                <span className="absolute inline-flex h-6 w-6 animate-ping rounded-full bg-emerald-400/40" />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-400 shadow shadow-emerald-500/80" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-3xl font-semibold tracking-tight text-slate-50">
+                    Civiq
+                  </h1>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-300 ring-1 ring-emerald-500/40">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                    Live
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-slate-400">
+                  Real-time crowd insight from your{' '}
+                  <span className="font-mono text-xs">locations</span> collection.
+                </p>
+              </div>
+            </div>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300 ring-1 ring-emerald-500/40">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-            Real-time
-          </span>
+
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              <span>&lt; 15 min</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />
+              <span>15–30 min</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+              <span>&gt; 30 min</span>
+            </div>
+          </div>
         </header>
 
         {loading ? (
@@ -104,7 +136,11 @@ export default function DashboardPage() {
                       <p className="text-[11px] uppercase tracking-wide text-slate-500">
                         Current wait
                       </p>
-                      <p className="text-3xl font-semibold text-slate-50">
+                      <p
+                        className={`text-3xl font-semibold ${getWaitTextColor(
+                          wait
+                        )} transition-colors`}
+                      >
                         {Number.isNaN(wait) ? '—' : wait}
                         <span className="ml-1 text-sm font-normal text-slate-400">min</span>
                       </p>

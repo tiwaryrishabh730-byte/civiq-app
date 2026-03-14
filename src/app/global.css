@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* This ensures our "Dark Mode" is consistent across the whole screen */
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 2, 6, 23;
+  --background-end-rgb: 2, 6, 23;
+}
+
+body {
+  background: rgb(var(--background-start-rgb));
+  color: rgb(var(--foreground-rgb));
+}
