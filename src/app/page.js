@@ -28,9 +28,37 @@ function getWaitClasses(wait) {
   return 'wait-value wait-high';
 }
 
+function getMinutesAgo(dateLike) {
+  if (!dateLike) return null;
+  const date =
+    typeof dateLike.toDate === 'function' ? dateLike.toDate() : new Date(dateLike);
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins <= 0) return 'just now';
+  if (diffMins === 1) return '1 min ago';
+  return `${diffMins} mins ago`;
+}
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const toRad = (v) => (v * Math.PI) / 180;
+  const R = 6371; // km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export default function DashboardPage() {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationError, setLocationError] = useState(null);
 
   async function updateWaitTime(locationId, waitValue) {
     try {
@@ -43,6 +71,34 @@ export default function DashboardPage() {
       console.error('Error updating wait time:', error);
     }
   }
+
+  // Get user GPS (best-effort; safe if denied)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      setLocationError('Geolocation not available');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+        setLocationError(null);
+      },
+      (err) => {
+        console.warn('Geolocation error:', err);
+        setLocationError('Permission denied or unavailable');
+        setUserLocation(null);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 8000,
+        maximumAge: 60000,
+      }
+    );
+  }, []);
 
   useEffect(() => {
     const q = query(collection(db, 'locations'));
@@ -75,6 +131,15 @@ export default function DashboardPage() {
             <p className="dashboard-subtitle">
               Real-time crowd insight from your <code>locations</code> collection.
             </p>
+            {userLocation && (
+              <p
+                className="dashboard-subtitle"
+                style={{ fontSize: '0.75rem', marginTop: '0.15rem' }}
+              >
+                Your location (approx): {userLocation.lat.toFixed(3)},{' '}
+                {userLocation.lng.toFixed(3)}
+              </p>
+            )}
           </div>
 
           <div className="dashboard-system-live">
@@ -127,6 +192,28 @@ export default function DashboardPage() {
               const wait = Number(loc.current_wait ?? 0);
               const status = getStatus(wait);
 
+              const hasCoords =
+                typeof loc.lat !== 'undefined' &&
+                typeof loc.lng !== 'undefined' &&
+                loc.lat !== null &&
+                loc.lng !== null &&
+                !Number.isNaN(Number(loc.lat)) &&
+                !Number.isNaN(Number(loc.lng));
+
+              let distanceText: string | null = null;
+              if (userLocation && hasCoords) {
+                const dKm = haversineKm(
+                  Number(userLocation.lat),
+                  Number(userLocation.lng),
+                  Number(loc.lat),
+                  Number(loc.lng)
+                );
+                distanceText = `${dKm.toFixed(1)} km away`;
+              }
+
+              const lastUpdatedRaw = loc.lastUpdated ?? loc.last_updated ?? null;
+              const lastUpdatedText = getMinutesAgo(lastUpdatedRaw);
+
               return (
                 <article key={loc.id} className="dashboard-card">
                   <div className="card-header">
@@ -134,6 +221,17 @@ export default function DashboardPage() {
                       <h2 className="card-title">{loc.name || 'Unnamed location'}</h2>
                       {loc.address && (
                         <p className="card-address">{loc.address}</p>
+                      )}
+                      {distanceText && (
+                        <p
+                          style={{
+                            marginTop: '0.2rem',
+                            fontSize: '0.75rem',
+                            color: '#9ca3af',
+                          }}
+                        >
+                          {distanceText}
+                        </p>
                       )}
                     </div>
                     <div className="status-pill">
@@ -186,13 +284,8 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </div>
-                    {loc.last_updated && (
-                      <p className="updated-text">
-                        Updated{' '}
-                        {typeof loc.last_updated.toDate === 'function'
-                          ? loc.last_updated.toDate().toLocaleTimeString()
-                          : new Date(loc.last_updated).toLocaleTimeString()}
-                      </p>
+                    {lastUpdatedText && (
+                      <p className="updated-text">Updated {lastUpdatedText}</p>
                     )}
                   </div>
                 </article>
