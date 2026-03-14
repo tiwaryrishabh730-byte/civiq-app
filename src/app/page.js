@@ -17,12 +17,15 @@ function getStatus(wait) {
 function getWaitTextClasses(wait) {
   if (Number.isNaN(wait)) return 'text-slate-300';
   if (wait < 15) {
-    return 'text-emerald-400 drop-shadow-[0_0_18px_rgba(16,185,129,0.85)]';
+    // Emerald glow for low wait times
+    return 'text-emerald-400 md:text-emerald-500 drop-shadow-[0_0_22px_rgba(16,185,129,0.95)]';
   }
   if (wait <= 30) {
-    return 'text-amber-300 drop-shadow-[0_0_18px_rgba(251,191,36,0.8)]';
+    // Amber glow for medium wait times
+    return 'text-amber-300 md:text-amber-400 drop-shadow-[0_0_22px_rgba(251,191,36,0.95)]';
   }
-  return 'text-rose-400 drop-shadow-[0_0_18px_rgba(248,113,113,0.8)]';
+  // Rose glow for high wait times
+  return 'text-rose-400 md:text-rose-500 drop-shadow-[0_0_22px_rgba(248,113,113,0.95)]';
 }
 
 export default function DashboardPage() {
@@ -56,7 +59,7 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-6xl">
         <header className="mb-10 flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-50">Civiq</h1>
+            <h1 className="text-4xl font-extrabold tracking-tight text-slate-50">Civiq</h1>
             <p className="text-sm text-slate-400">
               Real-time crowd insight from your{' '}
               <span className="font-mono text-xs">locations</span> collection.
@@ -109,7 +112,7 @@ export default function DashboardPage() {
               return (
                 <article
                   key={loc.id}
-                  className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/40 p-5 shadow-sm shadow-slate-950/40 backdrop-blur-md transition hover:border-slate-700 hover:shadow-lg"
+                  className="flex flex-col justify-between rounded-2xl border border-slate-700/80 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/60 backdrop-blur-md transition hover:border-slate-500 hover:shadow-2xl"
                 >
                   <div className="mb-4 flex items-start justify-between gap-3">
                     <div>
