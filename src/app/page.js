@@ -200,7 +200,7 @@ export default function DashboardPage() {
                 !Number.isNaN(Number(loc.lat)) &&
                 !Number.isNaN(Number(loc.lng));
 
-              let distanceText: string | null = null;
+              let distanceText = null;
               if (userLocation && hasCoords) {
                 const dKm = haversineKm(
                   Number(userLocation.lat),
