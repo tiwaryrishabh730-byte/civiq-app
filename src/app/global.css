@@ -30,10 +30,24 @@ body {
   margin-right: auto;
 }
 
+.dashboard-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* ~gap-3 */
+}
+
 .dashboard-logo-img {
-  height: 40px;
+  height: 40px; /* h-10 */
   width: auto;
   display: block;
+}
+
+.dashboard-logo-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #f9fafb;
 }
 
 /* Hero / spatial section */
@@ -356,11 +370,7 @@ body {
 .card-distance {
   margin-top: 0.25rem;
   font-size: 0.8rem;
-  color: #9ca3af;
-}
-
-.card-distance.near {
-  color: #67e8f9;
+  color: #22d3ee; /* cyan-400 */
 }
 
 .status-pill {

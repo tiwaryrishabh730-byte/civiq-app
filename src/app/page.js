@@ -13,7 +13,7 @@ import {
 import { db } from '../lib/firebase';
 
 const MUMBAI_MAP_SRC =
-  'https://images.unsplash.com/photo-1570160896387-996a9134db2b?q=80&w=2070&auto=format&fit=crop';
+  'https://images.unsplash.com/photo-1616843413587-9e3a37f7bbd8?auto=format&fit=crop&q=80&w=2000';
 
 function getStatus(wait) {
   if (wait < 20) {
@@ -140,15 +140,16 @@ export default function DashboardPage() {
       <div className="dashboard-inner">
         <header className="dashboard-header">
           <div>
-            <div>
+            <div className="dashboard-logo-row">
               <Image
                 src="/logo.png"
-                alt="Civiq"
+                alt="CIVIQ"
                 width={120}
                 height={40}
                 className="dashboard-logo-img"
                 priority
               />
+              <span className="dashboard-logo-text">CIVIQ</span>
             </div>
             <p className="dashboard-subtitle">
               Real-time crowd insight from your <code>locations</code> collection.
