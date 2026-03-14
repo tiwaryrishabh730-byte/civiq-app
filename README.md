@@ -32,4 +32,4 @@ This project utilizes a professional **CI/CD pipeline**. During development, we 
 3.  Observe the "Live Heartbeat" pulsing dot, indicating the system is actively polling cloud data.
 
 ---
-Built with ⚡ by [Your Name] for the April 3rd Demo.
+Built with ⚡ by Rishabh Tiwary
