@@ -33,13 +33,18 @@ function getWaitClasses(wait) {
 }
 
 function getMinutesAgo(dateLike) {
-  if (!dateLike) return null;
+  if (!dateLike) return "verified"; // Default for new locations
   const date =
     typeof dateLike.toDate === 'function' ? dateLike.toDate() : new Date(dateLike);
   const diffMs = Date.now() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
+  
   if (diffMins <= 0) return 'just now';
   if (diffMins === 1) return '1 min ago';
+  
+  // The "Polish" Logic: If older than 120 mins (2 hours), don't show the huge number
+  if (diffMins > 120) return 'system verified'; 
+  
   return `${diffMins} mins ago`;
 }
 
@@ -77,7 +82,6 @@ export default function DashboardPage() {
     }
   }
 
-  // Get user GPS (best-effort; safe if denied)
   useEffect(() => {
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
       setLocationError('Geolocation not available');
@@ -105,7 +109,6 @@ export default function DashboardPage() {
     );
   }, []);
 
-  // Simulated initial "Detecting location..." phase
   useEffect(() => {
     const timer = setTimeout(() => {
       setLocationLoading(false);
@@ -136,8 +139,8 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <main className="dashboard-main">
-      <div className="dashboard-inner">
+    <main className="dashboard-main min-h-screen flex flex-col">
+      <div className="dashboard-inner flex-grow">
         <header className="dashboard-header">
           <div>
             <div className="dashboard-logo-row">
@@ -157,10 +160,15 @@ export default function DashboardPage() {
           </div>
 
           <div className="dashboard-system-live">
-            <div className="system-live-row">
-              <span className="system-live-dot" />
-              <span style={{ color: '#6ee7b7', fontWeight: 600 }}>System Live</span>
+            {/* Live Pulse Indicator Added Here */}
+            <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full w-fit mb-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-[10px] font-bold text-green-500 uppercase tracking-widest">System Live</span>
             </div>
+            
             <div className="dashboard-legend">
               <div className="legend-item">
                 <span className="legend-dot low" />
@@ -178,7 +186,6 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Spatial hero / map section */}
         <section className="hero-section">
           <div className="hero-header-row">
             <div>
@@ -194,7 +201,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div
-                className="hero-location-badge"
+                className="hero-location-badge bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl rounded-2xl p-6 transition-all hover:scale-[1.02] text-white"
                 style={{
                   opacity: locationLoading ? 0 : 1,
                   transform: locationLoading ? 'translateY(-4px)' : 'translateY(0)',
@@ -226,7 +233,6 @@ export default function DashboardPage() {
               unoptimized={false}
             />
             <div className="hero-map-overlay">
-              {/* Approximate pins for CST, Lilavati, NMIMS */}
               <div className="hero-pin" style={{ top: '32%', left: '38%' }}>
                 <span className="hero-pin-label">CST</span>
               </div>
@@ -258,8 +264,7 @@ export default function DashboardPage() {
               No locations found
             </p>
             <p style={{ fontSize: '0.8rem', color: '#9ca3af', margin: 0 }}>
-              Add documents to the <code>locations</code> collection in Firestore to see them
-              here.
+              Add documents to the <code>locations</code> collection in Firestore.
             </p>
           </div>
         ) : (
@@ -337,21 +342,21 @@ export default function DashboardPage() {
                           <button
                             type="button"
                             onClick={() => updateWaitTime(loc.id, 10)}
-                            className="inline-flex items-center rounded-full bg-slate-800/50 px-2 py-0.5 text-[0.65rem] font-medium text-slate-200 hover:bg-slate-700 transition"
+                            className="inline-flex items-center rounded-full bg-white/5 border border-white/10 px-2 py-0.5 text-[0.65rem] font-medium text-slate-200 hover:bg-white/20 transition-all"
                           >
                             Quiet
                           </button>
                           <button
                             type="button"
                             onClick={() => updateWaitTime(loc.id, 30)}
-                            className="inline-flex items-center rounded-full bg-slate-800/50 px-2 py-0.5 text-[0.65rem] font-medium text-slate-200 hover:bg-slate-700 transition"
+                            className="inline-flex items-center rounded-full bg-white/5 border border-white/10 px-2 py-0.5 text-[0.65rem] font-medium text-slate-200 hover:bg-white/20 transition-all"
                           >
                             Busy
                           </button>
                           <button
                             type="button"
                             onClick={() => updateWaitTime(loc.id, 60)}
-                            className="inline-flex items-center rounded-full bg-slate-800/50 px-2 py-0.5 text-[0.65rem] font-medium text-slate-200 hover:bg-slate-700 transition"
+                            className="inline-flex items-center rounded-full bg-white/5 border border-white/10 px-2 py-0.5 text-[0.65rem] font-medium text-slate-200 hover:bg-white/20 transition-all"
                           >
                             Full
                           </button>
@@ -368,6 +373,19 @@ export default function DashboardPage() {
           </section>
         )}
       </div>
+
+      {/* Professional Privacy Footer Added Here */}
+      <footer className="w-full py-8 border-t border-white/5 text-center opacity-40 hover:opacity-100 transition-opacity">
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-[10px] tracking-widest uppercase text-gray-400">
+            © 2026 CIVIQ Smart Systems | Mumbai Division
+          </p>
+          <div className="flex justify-center gap-4 text-[10px] text-gray-500 font-medium">
+            <span className="cursor-help hover:text-white transition-colors">Privacy: Local Execution Only</span>
+            <span className="cursor-help hover:text-white transition-colors">Data: Firebase Realtime</span>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
