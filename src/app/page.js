@@ -83,30 +83,25 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-      setLocationError('Geolocation not available');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) return;
+  
+    // watchPosition keeps the connection open and updates whenever the GPS moves
+    const watchId = navigator.geolocation.watchPosition(
       (pos) => {
         setUserLocation({
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
         });
-        setLocationError(null);
+        setLocationLoading(false);
       },
-      (err) => {
-        console.warn('Geolocation error:', err);
-        setLocationError('Permission denied or unavailable');
-        setUserLocation(null);
-      },
+      (err) => console.warn(err),
       {
-        enableHighAccuracy: false,
-        timeout: 8000,
-        maximumAge: 60000,
+        enableHighAccuracy: true, // Better for travel
+        distanceFilter: 10,       // Only triggers if you move 10 meters
       }
     );
+  
+    return () => navigator.geolocation.clearWatch(watchId); // Cleanup
   }, []);
 
   useEffect(() => {
